@@ -28,4 +28,4 @@ Header.propTypes = {
 //    color: 'red', backgroundColor: 'black'
 //}
 
-export default Header
+export default Header;
