@@ -1,35 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import Tasks from './components/Tasks'
+import AddTask from './components/AddTask'
 
 function App() {
-  const [tasks, setTasks] = useState([{
-    id: 1,
-    text: 'Get soda',
-    day: 'Apr 26th at 10:30am',
-    reminder: true,
-  },
+  const [showAddTask, setShowAddTask] = useState(true);
+  const [tasks, setTasks] = useState([]);
 
-  {
-    id: 2,
-    text: 'Work out',
-    day: 'Apr 26th at 12:30pm',
-    reminder: true,
-  },
+  useEffect(() => {
+    const getTasks = async() => {
+      const tasksFromServer = await fetchTasks();
+      setTasks(tasksFromServer);
+    }
 
-  {
-    id: 3,
-    text: 'Have fun',
-    day: 'Apr 26th at 2:30pm',
-    reminder: true,
-  },
+    getTasks();
+  }, []);
 
-  {
-    id: 4,
-    text: 'Work',
-    day: 'Apr 26th at 3:30pm',
-    reminder: true,
-  },])
+  // Fetch Tasks
+  const fetchTasks = async() => {
+    const res = await fetch('http://localhost:5000/tasks');
+
+    const data = await res.json();
+
+    return data;
+  }
+
+  // Add Task
+  const addTask = (task) => {
+    const id = Math.floor(Math.random() * 10000) + 1;
+    const newTask = { id, ...task };
+    setTasks([...tasks, newTask]);
+  }
 
   // Delete Task (Prop Drilling)
   const deleteTask = (id) => {
@@ -40,19 +41,23 @@ function App() {
   // Toggle Reminder
   const toggleReminder = (id) => {
     console.log(id);
-    setTasks(tasks.map((task) => task.id === id ? {...task,reminder: 
-      !task.reminder } 
+    setTasks(tasks.map((task) => task.id === id ? {
+      ...task, reminder:
+        !task.reminder
+    }
       : task))
-  }
+  };
 
   return (
     <div className="container">
-      <Header />
+      <Header onAdd={() => setShowAddTask(!showAddTask)}
+        showAdd={showAddTask} />
+      {showAddTask && <AddTask onAdd={addTask} />}
       {tasks.length > 0 ? <Tasks tasks={tasks} onDelete={deleteTask}
         onToggle={toggleReminder} />
         : 'No Tasks!'}
     </div>
-  )
+  );
 }
 
 export default App;
